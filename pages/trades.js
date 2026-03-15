@@ -52,6 +52,7 @@ export default function Trades() {
       .order('created_at', { ascending: false });
 
     if (error) {
+      console.error(`Error fetching trades:`, error);
       alert(`Error fetching trades: ${error.message}`);
     } else {
       setTrades(data || []);
@@ -207,7 +208,7 @@ export default function Trades() {
 
           {pnl !== null && (
             <div className={`p-2 rounded ${pnl >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              PnL: {pnl.toFixed(2)}
+              PnL: {pnl.toFixed(2)} $
             </div>
           )}
 
@@ -271,12 +272,18 @@ export default function Trades() {
                   <td className="py-2 px-4 border">{trade.direction}</td>
                   <td className="py-2 px-4 border">{trade.entry_price}</td>
                   <td className="py-2 px-4 border">{trade.exit_price || '-'}</td>
-                  <td className="py-2 px-4 border">
+                  <td className={`py-2 px-4 border ${
+                      trade.exit_price && trade.entry_price ? (
+                        (trade.direction === 'buy'
+                          ? (trade.exit_price - trade.entry_price) * trade.lot_size
+                          : (trade.entry_price - trade.exit_price) * trade.lot_size
+                        ) > 0 ? 'text-green-600' : 'text-red-600'
+                      ) : ''}`}>
                     {trade.exit_price && trade.entry_price ? (
                       (trade.direction === 'buy'
                         ? (trade.exit_price - trade.entry_price) * trade.lot_size
                         : (trade.entry_price - trade.exit_price) * trade.lot_size
-                      ).toFixed(2)
+                      ).toFixed(2) + " $"
                     ) : '-'}
                   </td>
                   <td className="py-2 px-4 border">{trade.notes}</td>
