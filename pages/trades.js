@@ -55,6 +55,7 @@ export default function Trades() {
       console.error(`Error fetching trades:`, error);
       alert(`Error fetching trades: ${error.message}`);
     } else {
+      console.log("Fetched trades:", data); // Debug log
       setTrades(data || []);
     }
     setLoading(false);
@@ -77,6 +78,7 @@ export default function Trades() {
       ]);
 
     if (error) {
+      console.error("Error saving trade:", error); // Debug log
       alert(`Error saving trade: ${error.message}`);
     } else {
       alert('Trade saved successfully!');
@@ -89,7 +91,7 @@ export default function Trades() {
         notes: '',
       });
       setPnl(null);
-      fetchTrades(); // Refresh the trades list
+      await fetchTrades(); // Force refresh the trades list
     }
   };
 
