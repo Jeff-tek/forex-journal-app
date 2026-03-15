@@ -20,11 +20,6 @@ export default function Trades() {
   });
 
   const [trades, setTrades] = useState([]);
-
-  // Debug: Log trades state updates
-  useEffect(() => {
-    console.log("Updated trades state:", trades);
-  }, [trades]);
   const [loading, setLoading] = useState(true);
   const [pnl, setPnl] = useState(null);
 
@@ -56,7 +51,7 @@ export default function Trades() {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error("Supabase error:", error);
+      console.error(`Error fetching trades:`, error);
       alert(`Error fetching trades: ${error.message}`);
     } else {
       console.log("Fetched trades data:", data);
@@ -301,7 +296,4 @@ export default function Trades() {
               {trades.map(trade => (
                 <tr key={trade.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{trade.pair}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{trade.direction}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{trade.entry_price}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{trade.exit_price || '-'}</td>
-                  <td className={`px
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{
