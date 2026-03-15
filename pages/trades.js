@@ -20,6 +20,11 @@ export default function Trades() {
   });
 
   const [trades, setTrades] = useState([]);
+
+  // Debug: Log trades state updates
+  useEffect(() => {
+    console.log("Updated trades state:", trades);
+  }, [trades]);
   const [loading, setLoading] = useState(true);
   const [pnl, setPnl] = useState(null);
 
@@ -51,9 +56,10 @@ export default function Trades() {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error(`Error fetching trades:`, error);
+      console.error("Supabase error:", error);
       alert(`Error fetching trades: ${error.message}`);
     } else {
+      console.log("Fetched trades data:", data);
       setTrades(data || []);
     }
     setLoading(false);
