@@ -18,7 +18,7 @@ export default function Trades() {
     lotSize: '',
     notes: '',
   });
-  
+
   const [trades, setTrades] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pnl, setPnl] = useState(null);
@@ -28,12 +28,11 @@ export default function Trades() {
   }, []);
 
   useEffect(() => {
-    // Calculate PnL in real-time
     if (formData.entryPrice && formData.exitPrice && formData.lotSize) {
       const entry = parseFloat(formData.entryPrice);
       const exit = parseFloat(formData.exitPrice);
       const lot = parseFloat(formData.lotSize);
-      
+
       if (!isNaN(entry) && !isNaN(exit) && !isNaN(lot)) {
         const calculatedPnl = (formData.direction === 'buy'
           ? (exit - entry) * lot
@@ -55,7 +54,6 @@ export default function Trades() {
       console.error(`Error fetching trades:`, error);
       alert(`Error fetching trades: ${error.message}`);
     } else {
-      console.log("Fetched trades:", data); // Debug log
       setTrades(data || []);
     }
     setLoading(false);
@@ -63,7 +61,7 @@ export default function Trades() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const { data, error } = await supabase
       .from('trades')
       .insert([
@@ -78,7 +76,7 @@ export default function Trades() {
       ]);
 
     if (error) {
-      console.error("Error saving trade:", error); // Debug log
+      console.error("Error saving trade:", error);
       alert(`Error saving trade: ${error.message}`);
     } else {
       alert('Trade saved successfully!');
@@ -91,11 +89,10 @@ export default function Trades() {
         notes: '',
       });
       setPnl(null);
-      await fetchTrades(); // Force refresh the trades list
+      await fetchTrades();
     }
   };
 
-  // Calculate win rate and total PnL
   const { winRate, totalPnL } = calculateStats(trades);
 
   function calculateStats(trades) {
@@ -117,7 +114,6 @@ export default function Trades() {
     return { winRate, totalPnL };
   }
 
-  // Data for the win/loss chart
   const chartData = {
     labels: ['Wins', 'Losses'],
     datasets: [
@@ -138,163 +134,168 @@ export default function Trades() {
             return pnl <= 0;
           }).length
         ],
-        backgroundColor: ['#4CAF50', '#F44336'],
+        backgroundColor: ['#10B981', '#EF4444'],
       }
     ]
   };
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">Forex Journal</h1>
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Forex Journal</h1>
+        <p className="text-gray-600 dark:text-gray-300">Track your trades and performance</p>
+      </header>
 
       {/* Trade Form */}
-      <div className="bg-white p-6 rounded shadow mb-8">
-        <h2 className="text-xl font-semibold mb-4">Log a Trade</h2>
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 mb-8">
+        <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">Log a Trade</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <select
-              value={formData.pair}
-              onChange={(e) => setFormData({ ...formData, pair: e.target.value })}
-              className="p-2 border rounded w-full"
-            >
-              <option>EUR/USD</option>
-              <option>GBP/JPY</option>
-              <option>BTC/USD</option>
-            </select>
-            
-            <select
-              value={formData.direction}
-              onChange={(e) => setFormData({ ...formData, direction: e.target.value })}
-              className="p-2 border rounded w-full"
-            >
-              <option value="buy">Buy</option>
-              <option value="sell">Sell</option>
-            </select>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Currency Pair</label>
+              <select
+                value={formData.pair}
+                onChange={(e) => setFormData({ ...formData, pair: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                <option>EUR/USD</option>
+                <option>GBP/JPY</option>
+                <option>BTC/USD</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Direction</label>
+              <select
+                value={formData.direction}
+                onChange={(e) => setFormData({ ...formData, direction: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                <option value="buy">Buy</option>
+                <option value="sell">Sell</option>
+              </select>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <input
-              type="number"
-              step="0.0001"
-              placeholder="Entry Price"
-              value={formData.entryPrice}
-              onChange={(e) => setFormData({ ...formData, entryPrice: e.target.value })}
-              className="p-2 border rounded w-full"
-            />
-            
-            <input
-              type="number"
-              step="0.0001"
-              placeholder="Exit Price"
-              value={formData.exitPrice}
-              onChange={(e) => setFormData({ ...formData, exitPrice: e.target.value })}
-              className="p-2 border rounded w-full"
-            />
-            
-            <input
-              type="number"
-              step="0.01"
-              placeholder="Lot Size"
-              value={formData.lotSize}
-              onChange={(e) => setFormData({ ...formData, lotSize: e.target.value })}
-              className="p-2 border rounded w-full"
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Entry Price</label>
+              <input
+                type="number"
+                step="0.0001"
+                placeholder="Entry Price"
+                value={formData.entryPrice}
+                onChange={(e) => setFormData({ ...formData, entryPrice: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Exit Price</label>
+              <input
+                type="number"
+                step="0.0001"
+                placeholder="Exit Price"
+                value={formData.exitPrice}
+                onChange={(e) => setFormData({ ...formData, exitPrice: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Lot Size</label>
+              <input
+                type="number"
+                step="0.01"
+                placeholder="Lot Size"
+                value={formData.lotSize}
+                onChange={(e) => setFormData({ ...formData, lotSize: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notes</label>
+            <textarea
+              placeholder="Notes"
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              rows="3"
             />
           </div>
 
-          <textarea
-            placeholder="Notes"
-            value={formData.notes}
-            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            className="p-2 border rounded w-full"
-          />
-
           {pnl !== null && (
-            <div className={`p-2 rounded ${pnl >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              PnL: {pnl.toFixed(2)} $
+            <div className={`p-3 rounded-md ${pnl >= 0 ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+              <p className="font-medium">Projected PnL: <span className={pnl >= 0 ? 'text-green-600' : 'text-red-600'}>
+                {pnl.toFixed(2)} $
+              </span></p>
             </div>
           )}
 
-          <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full">
+          <button
+            type="submit"
+            className="w-full md:w-auto px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+          >
             Log Trade
           </button>
         </form>
       </div>
 
       {/* Dashboard Summary */}
-      <div className="bg-white p-6 rounded shadow mb-8">
-        <h2 className="text-xl font-semibold mb-4">Trade Summary</h2>
-        
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 mb-8">
+        <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-white">Trade Summary</h2>
+
         {loading ? (
-          <p>Loading trades...</p>
+          <p className="text-gray-600 dark:text-gray-300">Loading trades...</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div className="bg-gray-50 p-4 rounded">
-              <h3 className="text-lg font-semibold">Total Trades</h3>
-              <p className="text-2xl">{trades.length}</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">Total Trades</h3>
+              <p className="text-2xl font-bold text-gray-800 dark:text-white">{trades.length}</p>
             </div>
-            <div className="bg-gray-50 p-4 rounded">
-              <h3 className="text-lg font-semibold">Win Rate</h3>
-              <p className="text-2xl">{winRate.toFixed(1)}%</p>
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">Win Rate</h3>
+              <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{winRate.toFixed(1)}%</p>
             </div>
-            <div className="bg-gray-50 p-4 rounded">
-              <h3 className="text-lg font-semibold">Total PnL</h3>
-              <p className="text-2xl">{totalPnL.toFixed(2)}</p>
+            <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">Total PnL</h3>
+              <p className={`text-2xl font-bold ${totalPnL >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                {totalPnL >= 0 ? `+$${totalPnL.toFixed(2)}` : `-$${Math.abs(totalPnL).toFixed(2)}`}
+              </p>
             </div>
           </div>
         )}
 
         <div className="w-full md:w-1/2 mx-auto mb-6">
-          <h3 className="text-lg font-semibold mb-2">Win/Loss Ratio</h3>
-          <Pie data={chartData} />
+          <h3 className="text-lg font-semibold mb-2 text-gray-800 dark:text-white">Win/Loss Ratio</h3>
+          <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+            <Pie data={chartData} />
+          </div>
         </div>
       </div>
 
       {/* Recent Trades */}
-      <div className="bg-white p-6 rounded shadow">
-        <h2 className="text-xl font-semibold mb-4">Recent Trades</h2>
-        
-        {loading ? (
-          <p>Loading trades...</p>
-        ) : (
-          <table className="min-w-full border">
-            <thead>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <h2 className="text-xl font-semibold p-6 text-gray-800 dark:text-white">Recent Trades</h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="py-2 px-4 border">Pair</th>
-                <th className="py-2 px-4 border">Direction</th>
-                <th className="py-2 px-4 border">Entry Price</th>
-                <th className="py-2 px-4 border">Exit Price</th>
-                <th className="py-2 px-4 border">PnL</th>
-                <th className="py-2 px-4 border">Notes</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Pair</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Direction</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Entry</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Exit</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">PnL</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Notes</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {trades.map(trade => (
-                <tr key={trade.id}>
-                  <td className="py-2 px-4 border">{trade.pair}</td>
-                  <td className="py-2 px-4 border">{trade.direction}</td>
-                  <td className="py-2 px-4 border">{trade.entry_price}</td>
-                  <td className="py-2 px-4 border">{trade.exit_price || '-'}</td>
-                  <td className={`py-2 px-4 border ${
-                      trade.exit_price && trade.entry_price ? (
-                        (trade.direction === 'buy'
-                          ? (trade.exit_price - trade.entry_price) * trade.lot_size
-                          : (trade.entry_price - trade.exit_price) * trade.lot_size
-                        ) > 0 ? 'text-green-600' : 'text-red-600'
-                      ) : ''}`}>
-                    {trade.exit_price && trade.entry_price ? (
-                      (trade.direction === 'buy'
-                        ? (trade.exit_price - trade.entry_price) * trade.lot_size
-                        : (trade.entry_price - trade.exit_price) * trade.lot_size
-                      ).toFixed(2) + " $"
-                    ) : '-'}
-                  </td>
-                  <td className="py-2 px-4 border">{trade.notes}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </div>
-  );
-}
+                <tr key={trade.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{trade.pair}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{trade.direction}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{trade.entry_price}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{trade.exit_price || '-'}</td>
+                  <td className={`px
