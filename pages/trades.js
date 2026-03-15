@@ -54,7 +54,7 @@ export default function Trades() {
       console.error(`Error fetching trades:`, error);
       alert(`Error fetching trades: ${error.message}`);
     } else {
-      console.log("Fetched trades data:", data);
+      console.log("Fetched trades:", data);
       setTrades(data || []);
     }
     setLoading(false);
@@ -138,6 +138,22 @@ export default function Trades() {
         backgroundColor: ['#10B981', '#EF4444'],
       }
     ]
+  };
+
+  const getPnLClass = (trade) => {
+    if (!trade.exit_price || !trade.entry_price) return '';
+    const pnl = (trade.direction === 'buy'
+      ? (trade.exit_price - trade.entry_price) * trade.lot_size
+      : (trade.entry_price - trade.exit_price) * trade.lot_size);
+    return pnl > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+  };
+
+  const getPnLValue = (trade) => {
+    if (!trade.exit_price || !trade.entry_price) return '-';
+    const pnl = (trade.direction === 'buy'
+      ? (trade.exit_price - trade.entry_price) * trade.lot_size
+      : (trade.entry_price - trade.exit_price) * trade.lot_size);
+    return pnl.toFixed(2) + " $";
   };
 
   return (
@@ -229,8 +245,8 @@ export default function Trades() {
 
           {pnl !== null && (
             <div className={`p-3 rounded-md ${pnl >= 0 ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
-              <p className="font-medium">Projected PnL: <span className={pnl >= 0 ? 'text-green-600' : 'text-red-600'}>
-                {pnl.toFixed(2)} $
+              <p className="font-medium">Projected PnL: <span className={pnl >= 0 ? 'text-green-600' : 'text-red-600'}>{
+                pnl.toFixed(2)} $
               </span></p>
             </div>
           )}
@@ -288,12 +304,4 @@ export default function Trades() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Direction</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Entry</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Exit</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">PnL</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Notes</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {trades.map(trade => (
-                <tr key={trade.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{trade.pair}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-50
