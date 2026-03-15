@@ -1,4 +1,9 @@
 import { useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export default function Trades() {
   const [formData, setFormData] = useState({
@@ -10,9 +15,35 @@ export default function Trades() {
     notes: '',
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert('Trade logged! (Connect to Supabase in a real app)');
+    
+    const { data, error } = await supabase
+      .from('trades')
+      .insert([
+        {
+          pair: formData.pair,
+          direction: formData.direction,
+          entry_price: parseFloat(formData.entryPrice),
+          exit_price: parseFloat(formData.exitPrice),
+          lot_size: parseFloat(formData.lotSize),
+          notes: formData.notes,
+        }
+      ]);
+
+    if (error) {
+      alert(`Error saving trade: ${error.message}`);
+    } else {
+      alert('Trade saved successfully!');
+      setFormData({
+        pair: 'EUR/USD',
+        direction: 'buy',
+        entryPrice: '',
+        exitPrice: '',
+        lotSize: '',
+        notes: '',
+      });
+    }
   };
 
   return (
@@ -22,11 +53,19 @@ export default function Trades() {
         <select
           value={formData.pair}
           onChange={(e) => setFormData({ ...formData, pair: e.target.value })}
-          className="p-2 border rounded"
+          className="p-2 border rounded w-full"
         >
           <option>EUR/USD</option>
           <option>GBP/JPY</option>
           <option>BTC/USD</option>
+        </select>
+        <select
+          value={formData.direction}
+          onChange={(e) => setFormData({ ...formData, direction: e.target.value })}
+          className="p-2 border rounded w-full"
+        >
+          <option value="buy">Buy</option>
+          <option value="sell">Sell</option>
         </select>
         <input
           type="text"
@@ -35,7 +74,27 @@ export default function Trades() {
           onChange={(e) => setFormData({ ...formData, entryPrice: e.target.value })}
           className="p-2 border rounded w-full"
         />
-        <button type="submit" className="bg-blue-500 text-white p-2 rounded">
+        <input
+          type="text"
+          placeholder="Exit Price"
+          value={formData.exitPrice}
+          onChange={(e) => setFormData({ ...formData, exitPrice: e.target.value })}
+          className="p-2 border rounded w-full"
+        />
+        <input
+          type="text"
+          placeholder="Lot Size"
+          value={formData.lotSize}
+          onChange={(e) => setFormData({ ...formData, lotSize: e.target.value })}
+          className="p-2 border rounded w-full"
+        />
+        <textarea
+          placeholder="Notes"
+          value={formData.notes}
+          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+          className="p-2 border rounded w-full"
+        />
+        <button type="submit" className="bg-blue-500 text-white p-2 rounded w-full">
           Log Trade
         </button>
       </form>
